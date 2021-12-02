@@ -4,6 +4,11 @@ import com.mysql.cj.jdbc.MysqlDataSource;
 
 import java.sql.*;
 
+////////////////////////////
+// Adminer login
+// Your login: ydh648
+//Your pw: vXPNlWCLqs16uipFSnR0
+
 public class P3Program 
 {
     private Connection connect = null;
@@ -39,8 +44,12 @@ public class P3Program
         try 
         {
             // your code
-            
-
+            //crete select statement
+            preparedStatement = connect.prepareStatement
+                    ("select c.* from Customer c");
+            //preparedStatement.setString(1, "20181Sp");
+            resultSet = preparedStatement.executeQuery();
+            printCustomers("Beginning Customers",resultSet);
         } 
         catch (Exception e) 
         {
@@ -58,9 +67,39 @@ public class P3Program
        // Your output for this must match the format of my sample output exactly. 
        // custNr, name, baseLoc, birthDt, gender
         System.out.printf("%s\n", title);
+        System.out.printf("   %-8s%-20s       %-5s %-11s %-2s\n"
+                , "CustNr", "Name", "State", "Birth Dt", "Gender");
         // your code
-        
-    }
+        while (resultSet.next()) {
+            // It is possible to get the columns via name
+            // also possible to get the columns via the column number
+            // which starts at 1
+
+            //String timeStr;  // can be null
+
+            int custNr = resultSet.getInt("custNr");
+            String name = resultSet.getString("name");
+            if (name == null)
+                name = "---";
+            String baseLoc = resultSet.getString("baseLoc");
+            if (baseLoc == null)
+                baseLoc = "---";
+            String birthDt = resultSet.getString("birthDt");          // can be null
+            if (birthDt == null) {
+                birthDt = "---";
+            }
+            String gender = resultSet.getString("gender");      // can be null
+            if (gender == null)
+                gender = "---";
+            System.out.printf("   %-8s%-20s       %-5s %-11s %-2s\n"
+                    , custNr
+                    , name
+                    , baseLoc
+                    , birthDt
+                    , gender);
+        }
+
+        }
     
 
     // Close the resultSet, statement, preparedStatement, and connect
