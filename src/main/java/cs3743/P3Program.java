@@ -45,29 +45,114 @@ public class P3Program
         {
             // your code
             //crete select statement
+            //Part A
             preparedStatement = connect.prepareStatement
                     ("select c.* from Customer c");
-            //preparedStatement.setString(1, "20181Sp");
             resultSet = preparedStatement.executeQuery();
+            //Part B
             printCustomers("Beginning Customers",resultSet);
-        } 
-        catch (Exception e) 
+            //Part C
+            preparedStatement = connect.prepareStatement
+                    ("select m.* from Property m");
+            resultSet = preparedStatement.executeQuery();
+            //Part D
+            MySqlUtility.printUtility("Beginning Properties", resultSet);
+
+            //preparedStatement = connect.prepareStatement("insert into cs3743_ydh648.Customer (custNr, name, baseLoc, birthDt, gender)" + "values (1999, Wesley, LA, 1992/07/18, M)");
+            //Part E/F
+            preparedStatement = connect.prepareStatement("insert into cs3743_ydh648.Customer(custNr, name, baseLoc, birthDt, gender)" + "values (?,?,?,?, ?)");
+            int custNr = 1999;
+            String name = "Wesley Jackson";
+            String baseLoc = "LA";
+            String birthDt = "1992-07-18";
+            String gender = "M";
+
+            preparedStatement.setInt(1,custNr);
+            preparedStatement.setString(2,name);
+            preparedStatement.setString(3,baseLoc);
+            preparedStatement.setString(4,birthDt);
+            preparedStatement.setString(5,gender);
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            switch (e.getErrorCode())
+            {
+                case ER_DUP_ENTRY:
+                case ER_DUP_ENTRY_WITH_KEY_NAME:
+                    System.out.printf("Duplicate key error: %s\n", e.getMessage());
+                    break;
+                default:
+                    throw e;
+            }
+        }
+        catch (Exception e)
         {
             throw e;
-        } 
-        finally 
-        {
-            close();
         }
+        //PART E/F
+        preparedStatement = connect.prepareStatement
+                ("select c.* from Customer c");
+        resultSet = preparedStatement.executeQuery();
+        printCustomers("Customers after I was added ",resultSet);
+        preparedStatement = connect.prepareStatement
+                ("select TABLE_SCHEMA, TABLE_NAME, INDEX_NAME\n" +
+                        ", SEQ_IN_INDEX, COLUMN_NAME, CARDINALITY\n" +
+                        "from INFORMATION_SCHEMA.STATISTICS\n" +
+                        "where TABLE_SCHEMA = 'cs3743_ydh648'\n" +
+                        "and TABLE_NAME = \"Rental\"\n" +
+                        "order by INDEX_NAME, SEQ_IN_INDEX;");
+        resultSet = preparedStatement.executeQuery();
+        MySqlUtility.printUtility("My Rental Indexes", resultSet);
+        //Part H
+        preparedStatement = connect.prepareStatement("insert into cs3743_ydh648.Rental(custNr, propId, startDt, totalCost)" + "values (?,?,?,?)");
+        //Part I
+        double totalCost = 200;
+        for(int i = 1; i < strPropertyIdM.length; i++){
+            if(strPropertyIdM[i].equals("END")){
+                int custNr = 1999;
+                String propId = strPropertyIdM[i];
+                String startDt = "2019-12-14";
+                preparedStatement.setInt(1,custNr);
+                preparedStatement.setString(2,propId);
+                preparedStatement.setString(3,startDt);
+                preparedStatement.setDouble(4,totalCost);
+                try {
+                    preparedStatement.executeUpdate();
+                }catch (SQLException e)
+                    {
+                        switch (e.getErrorCode())
+                        {
+                            case ER_DUP_ENTRY:
+                            case ER_DUP_ENTRY_WITH_KEY_NAME:
+                                System.out.printf("Duplicate key error: %s\n", e.getMessage());
+                                break;
+                            default:
+                                throw e;
+                        }
+                    }
+        catch (Exception e)
+                    {
+                        throw e;
+                    }
+                //adds 10 for each of the rentals
+                totalCost += 10;
+            }
 
-    }                                                                                                                        
-    
-    private void printCustomers(String title, ResultSet resultSet) throws SQLException 
+        }
+        //Part J
+        preparedStatement = connect.prepareStatement
+                ("select r.* from Rental r");
+        resultSet = preparedStatement.executeQuery();
+
+    }
+
+    private void printCustomers(String title, ResultSet resultSet) throws SQLException
     {
        // Your output for this must match the format of my sample output exactly. 
        // custNr, name, baseLoc, birthDt, gender
         System.out.printf("%s\n", title);
-        System.out.printf("   %-8s%-20s       %-5s %-11s %-2s\n"
+        System.out.printf("   %-8s%-20s           %-5s %-11s %-2s\n"
                 , "CustNr", "Name", "State", "Birth Dt", "Gender");
         // your code
         while (resultSet.next()) {
@@ -91,7 +176,7 @@ public class P3Program
             String gender = resultSet.getString("gender");      // can be null
             if (gender == null)
                 gender = "---";
-            System.out.printf("   %-8s%-20s       %-5s %-11s %-2s\n"
+            System.out.printf("   %-8s%-20s           %-5s %-11s %-2s\n"
                     , custNr
                     , name
                     , baseLoc
